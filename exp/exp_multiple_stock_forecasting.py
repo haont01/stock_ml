@@ -201,7 +201,7 @@ class Exp_MultiStock_Forecast(Exp_Basic):
                 early_stopping(vali_loss, self.model, path)
                 if early_stopping.early_stop:
                     print("Early stopping")
-                    break
+                    continue
 
                 adjust_learning_rate(model_optim, epoch + 1, self.args)
 

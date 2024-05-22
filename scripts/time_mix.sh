@@ -1,6 +1,6 @@
 python -u run.py \
   --task_name long_term_forecast \
-  --is_training 0 \
+  --is_training 1 \
   --root_path ./dataset/stock/top10v2 \
   --data_path train.csv \
   --model_id TimeMixer_96_'_'96 \
