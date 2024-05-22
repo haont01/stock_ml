@@ -3,6 +3,7 @@ import os
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
 from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
+from exp.exp_multiple_stock_forecasting import Exp_MultiStock_Forecast
 from utils.print_args import print_args
 import random
 import numpy as np
@@ -97,13 +98,14 @@ if __name__ == '__main__':
     # GPU
     parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu')
     parser.add_argument('--gpu', type=int, default=0, help='gpu')
-    parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
+    parser.add_argument('--use_multi_gpu', help='use multiple gpus', default=False)
     parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')
 
     # de-stationary projector params
     parser.add_argument('--p_hidden_dims', type=int, nargs='+', default=[128, 128],
                         help='hidden layer dimensions of projector (List)')
     parser.add_argument('--p_hidden_layers', type=int, default=2, help='number of hidden layers in projector')
+    parser.add_argument('--predict_multi_stock', action='store_true', default=False, help='Predict prices of many stocks')
 
     args = parser.parse_args()
     # args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
@@ -121,7 +123,8 @@ if __name__ == '__main__':
     print_args(args)
 
     if args.task_name == 'long_term_forecast':
-        Exp = Exp_Long_Term_Forecast
+        # Exp = Exp_Long_Term_Forecast
+        Exp = Exp_MultiStock_Forecast
     elif args.task_name == 'short_term_forecast':
         Exp = Exp_Short_Term_Forecast
 

@@ -82,11 +82,15 @@ def visual(true, preds=None, name='./pic/test.pdf'):
     """
     Results visualization
     """
-    plt.figure()
-    plt.plot(true, label='GroundTruth', linewidth=2)
+    plt.figure(figsize=(30,6))
+    plt.plot(true, label='GroundTruth', linewidth=1)
     if preds is not None:
-        plt.plot(preds, label='Prediction', linewidth=2)
+        plt.plot(preds, label='Prediction', linewidth=1)
+        
+    # red_points = [i for i in range(240, len(true), 240)]
+    # plt.scatter(red_points, [true[i] for i in red_points], color='red', label='Red Points')
     plt.legend()
+    print("Save name picture", name)
     plt.savefig(name, bbox_inches='tight')
 
 

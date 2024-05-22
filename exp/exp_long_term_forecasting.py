@@ -2,6 +2,7 @@ from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
+from utils.losses import smape_loss, mape_loss, mase_loss
 import torch
 import torch.nn as nn
 from torch import optim
@@ -33,8 +34,22 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return model_optim
 
     def _select_criterion(self):
-        criterion = nn.MSELoss()
-        return criterion
+        # criterion = nn.MSELoss()
+        # criterion = nn.L1Loss()
+        loss_name = self.args.loss
+        if loss_name == 'MSE':
+            return nn.MSELoss()
+        elif loss_name == 'MAE':
+            return nn.L1Loss()
+        elif loss_name == 'MAPE':
+            return mape_loss()
+        elif loss_name == 'MASE':
+            return mase_loss()
+        elif loss_name == 'SMAPE':
+            return smape_loss()
+        else:
+            return nn.MSELoss()
+        # return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
@@ -177,12 +192,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def test(self, setting, test=0):
         test_data, test_loader = self._get_data(flag='test')
+
+        # print('test loader', len(test_data))
+        # print(test_data)
         if test:
             print('loading model')
             self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth')))
 
         preds = []
         trues = []
+        gt_values = []
+        pd_values = []
         folder_path = './test_results/' + setting + '/'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
@@ -195,7 +215,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 batch_x_mark = batch_x_mark.float().to(self.device)
                 batch_y_mark = batch_y_mark.float().to(self.device)
-
                 # decoder input
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
@@ -225,25 +244,43 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         
                 outputs = outputs[:, :, f_dim:]
                 batch_y = batch_y[:, :, f_dim:]
+                # print("Number: ", i)
+                # print(batch_y)
 
                 pred = outputs
                 true = batch_y
 
                 preds.append(pred)
                 trues.append(true)
-                if i % 100 == 0:
-                    input = batch_x.detach().cpu().numpy()
-                    if test_data.scale and self.args.inverse:
-                        shape = input.shape
-                        input = test_data.inverse_transform(input.squeeze(0)).reshape(shape)
-                    gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
-                    pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
-                    # print("trust", gt)
-                    # print("guess", pd)
-                    visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
+                if i % 1 == 0:
+                    gt_values.append(true[0, :, -1])
+                    pd_values.append(pred[0, :, -1])
+                    # input = batch_x.detach().cpu().numpy()
+                    # if test_data.scale and self.args.inverse:
+                    #     shape = input.shape
+                    #     input = test_data.inverse_transform(input.squeeze(0)).reshape(shape)
+                    # gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
+                    # pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
+                    # visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
+                    # visual(true[0, :, -1], pred[0, :, -1], os.path.join(folder_path, str(i) + '.pdf'))
 
         preds = np.array(preds)
         trues = np.array(trues)
+        groundtruth = np.concatenate(gt_values, axis=0)
+        predicted = np.concatenate(pd_values, axis=0)
+        gts = np.array_split(groundtruth, 10)
+        pds = np.array_split( predicted, 10)
+        a = 0
+        for gt, pd in zip(gts, pds):
+            visual(gt, pd, os.path.join(folder_path, str(a) + '.pdf'))
+            a = a + 1
+        # for i in range(10):
+        #     _gt = gt[600 * i, 600 * (i+1)]
+        #     _pd = pd[600 * i, 600 * (i+1)]
+        #     visual(_gt, _pd, os.path.join(folder_path, str(i) + '.pdf'))
+        visual(groundtruth, predicted, os.path.join(folder_path, 'total' + '.pdf'))
+
+
         print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])

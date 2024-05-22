@@ -1,9 +1,9 @@
-from data_provider.data_loader import StockLoader, StockLoaderV2
+from data_provider.data_loader import StockLoader, MultiStockLoader
 from torch.utils.data import DataLoader  # type: ignore
 
 data_dict = {
     'stock': StockLoader,
-    'stockv2': StockLoaderV2,
+    'multi_stock': MultiStockLoader,
 }
 
 def data_provider(args, flag):
