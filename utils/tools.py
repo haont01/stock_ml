@@ -87,10 +87,10 @@ def visual(true, preds=None, name='./pic/test.pdf'):
     if preds is not None:
         plt.plot(preds, label='Prediction', linewidth=1)
         
-    # red_points = [i for i in range(240, len(true), 240)]
-    # plt.scatter(red_points, [true[i] for i in red_points], color='red', label='Red Points')
+    red_points = [i for i in range(10, len(true), 10)]
+    plt.scatter(red_points, [true[i] for i in red_points], color='red', label='Red Points', s=3)
     plt.legend()
-    print("Save name picture", name)
+    # print("Save name picture", name)
     plt.savefig(name, bbox_inches='tight')
 
 

@@ -2,9 +2,9 @@ from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.losses import mape_loss, mase_loss, smape_loss
-import torch
-import torch.nn as nn
-from torch import optim
+import torch # type: ignore
+import torch.nn as nn # type: ignore
+from torch import optim # type: ignore
 import os
 import time
 import warnings

@@ -290,16 +290,16 @@ class Exp_MultiStock_Forecast(Exp_Basic):
 
                     preds.append(pred)
                     trues.append(true)
-                    if i % 1 == 0:
+                    if i % self.args.pred_len == 0:
                         gt_values.append(true[0, :, -1])
                         pd_values.append(pred[0, :, -1])
-                        # input = batch_x.detach().cpu().numpy()
-                        # if test_data.scale and self.args.inverse:
-                        #     shape = input.shape
-                        #     input = test_data.inverse_transform(input.squeeze(0)).reshape(shape)
-                        # gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
-                        # pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
-                        # visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
+                        input = batch_x.detach().cpu().numpy()
+                        if test_data[stock].scale and self.args.inverse:
+                            shape = input.shape
+                            input = test_data.inverse_transform(input.squeeze(0)).reshape(shape)
+                        _gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
+                        _pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
+                        visual(_gt, _pd, os.path.join(folder_path, str(i) + '.pdf'))
                             # visual(true[0, :, -1], pred[0, :, -1], os.path.join(folder_path, str(i) + '.pdf'))
 
             preds = np.array(preds)
