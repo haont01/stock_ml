@@ -87,8 +87,23 @@ def visual(true, preds=None, name='./pic/test.pdf'):
     if preds is not None:
         plt.plot(preds, label='Prediction', linewidth=1)
         
-    red_points = [i for i in range(10, len(true), 10)]
-    plt.scatter(red_points, [true[i] for i in red_points], color='red', label='Red Points', s=3)
+    # red_points = [i for i in range(10, len(true), 10)]
+    # plt.scatter(red_points, [true[i] for i in red_points], color='red', label='Red Points', s=3)
+    plt.legend()
+    # print("Save name picture", name)
+    plt.savefig(name, bbox_inches='tight')
+
+def visual_plus(true, preds=None, low=None, high=None, name='./pic/text.pdf'):
+    plt.figure(figsize=(30,6))
+    # plt.plot(true, label='GroundTruth', linewidth=1)
+    # if preds is not None:
+    #     plt.plot(preds, label='Prediction', linewidth=1, color='orange')
+        
+    if low is not None:
+        plt.plot(low, label='Low', linewidth=1, color='red')
+    if high is not None:
+        plt.plot(high, label='High', linewidth=1, color='green')
+    
     plt.legend()
     # print("Save name picture", name)
     plt.savefig(name, bbox_inches='tight')

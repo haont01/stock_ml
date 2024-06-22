@@ -1,6 +1,6 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
-from utils.tools import EarlyStopping, adjust_learning_rate, visual
+from utils.tools import EarlyStopping, adjust_learning_rate, visual, visual_plus
 from utils.metrics import metric
 from utils.losses import smape_loss, mape_loss, mase_loss
 import torch # type: ignore
@@ -223,9 +223,9 @@ class Exp_MultiStock_Forecast(Exp_Basic):
         # test_data, test_loader = self._get_data(flag='test')
 
         if test:
-            print('loading model')
+            # print('loading model:', os.path.join('./checkpoints/', 'checkpoint.pth'))
             self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth')))
-
+            
 
         folder_path = './test_results/' + setting + '/'
         if not os.path.exists(folder_path):
@@ -239,12 +239,13 @@ class Exp_MultiStock_Forecast(Exp_Basic):
         self.model.eval()
 
         for stock in stockList:
-            print("Stock: ", stock)
             # folder_path = folder_path
             preds = []
             trues = []
             gt_values = []
             pd_values = []
+            pd_low = []
+            pd_high = []
 
             with torch.no_grad():
                 for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader[stock]):
@@ -256,6 +257,13 @@ class Exp_MultiStock_Forecast(Exp_Basic):
                     # decoder input
                     dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                     dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+
+                    # if i == 1:
+                        # print("x", batch_x.shape)
+                        # print("y", batch_y.shape)
+                        # print("x_mark", batch_x_mark.shape)
+                        # print("y_mark", batch_y_mark.shape)
+                        # print("dec_inp", dec_inp.shape)
                     # encoder - decoder
                     if self.args.use_amp:
                         with torch.cuda.amp.autocast():
@@ -291,21 +299,28 @@ class Exp_MultiStock_Forecast(Exp_Basic):
                     preds.append(pred)
                     trues.append(true)
                     if i % self.args.pred_len == 0:
+                        # print("predict: ", pred)
+                        # print
                         gt_values.append(true[0, :, -1])
                         pd_values.append(pred[0, :, -1])
+                        pd_low.append(pred[0, :, -2])
+                        pd_high.append(pred[0, :, -3])
+
                         input = batch_x.detach().cpu().numpy()
                         if test_data[stock].scale and self.args.inverse:
                             shape = input.shape
                             input = test_data.inverse_transform(input.squeeze(0)).reshape(shape)
-                        _gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
-                        _pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
-                        visual(_gt, _pd, os.path.join(folder_path, str(i) + '.pdf'))
+                        # _gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
+                        # _pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
+                        # visual(_gt, _pd, os.path.join(folder_path, str(i) + '.pdf'))
                             # visual(true[0, :, -1], pred[0, :, -1], os.path.join(folder_path, str(i) + '.pdf'))
 
             preds = np.array(preds)
             trues = np.array(trues)
             groundtruth = np.concatenate(gt_values, axis=0)
             predicted = np.concatenate(pd_values, axis=0)
+            predict_low = np.concatenate(pd_low, axis=0)
+            predict_high = np.concatenate(pd_high, axis=0)
             # gts = np.array_split(groundtruth, 10)
             # pds = np.array_split( predicted, 10)
             # a = 0
@@ -313,7 +328,8 @@ class Exp_MultiStock_Forecast(Exp_Basic):
             #     visual(_gt, _pd, os.path.join(folder_path, str(a) + '.pdf'))
             #     a = a + 1
 
-            visual(groundtruth, predicted, os.path.join(folder_path, stock + '.pdf'))
+            # visual(groundtruth, predicted, os.path.join(folder_path, stock + '.pdf'))
+            visual_plus(true=groundtruth, preds=predicted, low=predict_low, high=predict_high, name=os.path.join(folder_path, stock + '.pdf'))
 
 
             print('test shape:', preds.shape, trues.shape)

@@ -1,9 +1,9 @@
 python -u run.py \
   --task_name long_term_forecast \
-  --is_training 1 \
+  --is_training 0 \
   --root_path ./dataset/stock/top10v2 \
   --data_path train.csv \
-  --model_id TimeMixer_96_'_'96 \
+  --model_id TimeMixer_1406 \
   --model TimeMixer \
   --data multi_stock \
   --features M \
@@ -18,7 +18,7 @@ python -u run.py \
   --d_model 16 \
   --d_ff 32 \
   --learning_rate 0.001 \
-  --train_epochs 10 \
+  --train_epochs 2 \
   --patience 10 \
   --batch_size 128 \
   --down_sampling_layers 2 \
