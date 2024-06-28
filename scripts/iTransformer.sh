@@ -5,12 +5,12 @@ model_name=iTransformer
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/stock/AAPL_hours \
+  --root_path ./dataset/stock/top10v2 \
   --data_path train.csv \
   --model_id Stock_iTransformer_96 \
   --model $model_name \
-  --data stock \
-  --features MS \
+  --data multi_stock \
+  --features M \
   --seq_len 96 \
   --label_len 0 \
   --pred_len 1\
@@ -28,4 +28,5 @@ python -u run.py \
   --batch_size 16 \
   --train_epochs 10 \
   --freq h \
-  --use_multi_gpu True
+  --use_multi_gpu True \
+  --predict_multi_stock
