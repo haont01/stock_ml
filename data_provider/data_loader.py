@@ -146,7 +146,6 @@ class MultiStockLoader(Dataset):
             df_data = df_raw[cols_data]
         elif self.features == 'S':
             df_data = df_raw[[self.target]]
-                        
         if self.scale:
             train_data = df_data
             self.scaler.fit(train_data.values)

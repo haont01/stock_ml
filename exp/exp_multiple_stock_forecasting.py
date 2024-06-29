@@ -329,13 +329,12 @@ class Exp_MultiStock_Forecast(Exp_Basic):
             #     a = a + 1
 
             # visual(groundtruth, predicted, os.path.join(folder_path, stock + '.pdf'))
-            visual_plus(true=groundtruth, preds=predicted, low=predict_low, high=predict_high, name=os.path.join(folder_path, stock + '.pdf'))
 
 
-            print('test shape:', preds.shape, trues.shape)
+            # print('test shape:', preds.shape, trues.shape)
             preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
             trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-            print('test shape:', preds.shape, trues.shape)
+            # print('test shape:', preds.shape, trues.shape)
 
             # result save
             result_folder_path = './results/' + setting + '/'
@@ -343,6 +342,12 @@ class Exp_MultiStock_Forecast(Exp_Basic):
                 os.makedirs(result_folder_path)
 
             mae, mse, rmse, mape, mspe = metric(preds, trues)
+
+            print(type(groundtruth))
+
+            visual_plus(true=groundtruth[: 300], preds=predicted, low=predict_low[:300], high=predict_high[:300], name=os.path.join(folder_path, stock + '.pdf'), symbol=stock, mse=mse, mae=mae)
+
+
             print('mse:{}, mae:{}'.format(mse, mae))
             f = open("result_long_term_forecast.txt", 'a')
             f.write(setting + "  \n")

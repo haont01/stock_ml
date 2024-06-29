@@ -93,17 +93,17 @@ def visual(true, preds=None, name='./pic/test.pdf'):
     # print("Save name picture", name)
     plt.savefig(name, bbox_inches='tight')
 
-def visual_plus(true, preds=None, low=None, high=None, name='./pic/text.pdf'):
-    plt.figure(figsize=(30,6))
-    # plt.plot(true, label='GroundTruth', linewidth=1)
+def visual_plus(true, preds=None, low=None, high=None, name='./pic/text.pdf',symbol=None, mse=None, mae=None):
+    plt.figure(figsize=(14,6))
+    plt.plot(true, label='GroundTruth', linewidth=1, color='blue')
     # if preds is not None:
     #     plt.plot(preds, label='Prediction', linewidth=1, color='orange')
         
     if low is not None:
-        plt.plot(low, label='Low', linewidth=1, color='red')
+        plt.plot(low, label='Predict Low', linewidth=1, color='red')
     if high is not None:
-        plt.plot(high, label='High', linewidth=1, color='green')
-    
+        plt.plot(high, label='Predict High', linewidth=1, color='green')
+    plt.title(f'{symbol} with MSE: {f"{mse:.2f}"} and MAE: {f"{mae:.2f}"}')    
     plt.legend()
     # print("Save name picture", name)
     plt.savefig(name, bbox_inches='tight')
